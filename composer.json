@@ -1,5 +1,5 @@
 {
-    "name": "naturalbuild/namecheap-sdk",
+    "name": "gluebag/namecheap-sdk",
     "description": "SDK library for Namecheap APIs",
     "type": "library",
     "license": "MIT",
