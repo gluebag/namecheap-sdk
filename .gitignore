@@ -1,0 +1,23 @@
+deploy.sh
+
+.DS_Store
+*.sublime-*
+.sass-cache
+.elasticbeanstalk
+*.pem
+
+.env
+.env.*
+
+# Php Storm
+.idea
+
+# Laravel
+bootstrap/compiled.php
+/vendor
+composer.phar
+.env.local.php
+.env.php
+Thumbs.db
+.elasticbeanstalk/
+
