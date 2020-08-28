@@ -2,6 +2,7 @@
 
 namespace Namecheap\Domain;
 
+use Carbon\Carbon;
 use Namecheap\Api;
 use Namecheap\Exception\NamecheapException;
 /**
@@ -65,7 +66,19 @@ class Domains extends Api {
 
         collect(data_get($resp, 'ApiResponse.CommandResponse.DomainGetListResult.Domain'))
 			->each(function($domain) use (&$domains) {
-				$domains[] = $domain;
+				$domains[] = [
+					'id' => $domain['_ID'],
+					'domain' => $domain['_Name'],
+					'user' => $domain['_User'],
+                    'expired' => filter_var($domain['_IsExpired'], FILTER_VALIDATE_BOOLEAN),
+                    'locked' => filter_var($domain['_IsLocked'], FILTER_VALIDATE_BOOLEAN),
+                    'auto_renew' => filter_var($domain['_AutoRenew'], FILTER_VALIDATE_BOOLEAN),
+                    'whois_guard' => filter_var($domain['_WhoisGuard'], FILTER_VALIDATE_BOOLEAN),
+                    'premium' => filter_var($domain['_IsPremium'], FILTER_VALIDATE_BOOLEAN),
+                    'uses_namecheap_dns' => filter_var($domain['_IsOurDNS'], FILTER_VALIDATE_BOOLEAN),
+					'created_at' => Carbon::parse($domain['_Created'], 'America/New_York'),
+					'expires_at' => Carbon::parse($domain['_Expires'], 'America/New_York'),
+				];
 			});
 
         // Go to next page...
