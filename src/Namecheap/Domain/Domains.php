@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Namecheap\Domain;
 
@@ -29,14 +29,53 @@ class Domains extends Api {
      */
 	public function getList($searchTerm=null, $listType=null, $page=null, $pageSize=null, $sortBy=null) {
 		$data = [
-			'ListType' => $listType, 
-			'SearchTerm' => $searchTerm, 
-			'Page' => $page, 
-			'PageSize' => $pageSize, 
+			'ListType' => $listType,
+			'SearchTerm' => $searchTerm,
+			'Page' => $page,
+			'PageSize' => $pageSize,
 			'SortBy' => $sortBy
 		];
 		return $this->get($this->command.__FUNCTION__, $data);
 	}
+
+    /**
+     * @param null|string $searchTerm
+     * @param null|string $listType
+     * @param null|string $sortBy
+     * @return array
+     */
+    public function getListAll($searchTerm=null, $listType=null, $sortBy=null) {
+
+    	$domains = [];
+        $page = 1;
+        $pageSize = 100;
+
+        NextPage:
+
+        $data = [
+            'ListType' => $listType,
+            'SearchTerm' => $searchTerm,
+            'Page' => $page,
+            'PageSize' => $pageSize,
+            'SortBy' => $sortBy
+        ];
+
+        $resp = json_decode($this->get($this->command.__FUNCTION__, $data), true);
+        $totalResults = (int)data_get($resp, 'ApiResponse.CommandResponse.Paging.TotalItems');
+
+        collect(data_get($resp, 'ApiResponse.CommandResponse.DomainGetListResult.Domain'))
+			->each(function($domain) use (&$domains) {
+				$domains[] = $domain;
+			});
+
+        // Go to next page...
+        if(count($domains) < $totalResults) {
+        	$page += 1;
+        	goto NextPage;
+		}
+
+		return $domains;
+    }
 
 	/**
      * @todo Gets contact information of the requested domain.
@@ -47,11 +86,11 @@ class Domains extends Api {
 		return $this->get($this->command.__FUNCTION__, ['DomainName'=>$domainName]);
 	}
 
-	
+
 	/**
 	 * @todo Registers a new domain name.
-	 * 
-	 * @param str|domainName|Req : Domain name to register 
+	 *
+	 * @param str|domainName|Req : Domain name to register
 	 * @param num|years|Req : Number of years to register Default Value: 2
 	 *
 	 * @param str|registrantFirstName|Req : First name of the Registrant user
@@ -135,7 +174,7 @@ class Domains extends Api {
 	 * @param str|billingStateProvinceChoice|Opt : StateProvinceChoice of the billing user
 	 * @param str|billingPhoneExt|Opt : PhoneExt of the billing user
 	 * @param str|billingFax|Opt : Fax number in the format +NNN.NNNNNNNNNN
-	 * 
+	 *
 	 * @param str|idnCode|Opt : Code of Internationalized Domain Name (please refer to the note below)
 	 * @param str|nameservers|Opt : Comma-separated list of custom nameservers to be associated with the domain name
 	 * @param str|addFreeWhoisguard|Opt : Adds free WhoisGuard for the domain Default Value: no
@@ -290,7 +329,7 @@ class Domains extends Api {
 	/**
 	 * @todo Gets the RegistrarLock status of the requested domain.
 	 *
-	 * @param str|DomainName|req : Domain name to get status for	
+	 * @param str|DomainName|req : Domain name to get status for
 	 */
 	public function getRegistrarLock($domainName) {
 		$data=['DomainName' => $domainName];
@@ -300,8 +339,8 @@ class Domains extends Api {
 	/**
 	 * @todo Sets the RegistrarLock status for a domain.
 	 *
-	 * @param str|DomainName|req : Domain name to get status for	
-	 * @param str|LockAction|opt : Possible values: LOCK, UNLOCK. | Default Value: LOCK.	
+	 * @param str|DomainName|req : Domain name to get status for
+	 * @param str|LockAction|opt : Possible values: LOCK, UNLOCK. | Default Value: LOCK.
 	 */
 	public function setRegistrarLock($domainName, $lockAction=null) {
 		$data=[
@@ -313,7 +352,7 @@ class Domains extends Api {
 
 	/**
 	 * @todo Returns information about the requested domain.
-	 * @param str|domainName|req : Domain name for which domain information needs to be requested	
+	 * @param str|domainName|req : Domain name for which domain information needs to be requested
 	 * @param str|hostName|opt : Hosted domain name for which domain information needs to be requested
 	 */
 	public function getInfo($domainName, $hostName=null) {
@@ -351,7 +390,7 @@ class Domains extends Api {
 			'BillingPhoneExt' 		=> !empty($cd['billingPhoneExt']) ? $cd['billingPhoneExt'] : null,
 			'BillingFax' 		    => !empty($cd['billingFax']) ? $cd['billingFax'] : null,
 			'BillingEmailAddress'   => !empty($cd['billingEmailAddress']) ? $cd['billingEmailAddress'] : null,
-			
+
 		];
 
 		$extra = [
@@ -386,7 +425,7 @@ class Domains extends Api {
 			'RegistrantLastName'  		=> !empty($d['registrantLastName']) ? $d['registrantLastName'] : null,
 			'RegistrantAddress1'  		=> !empty($d['registrantAddress1']) ? $d['registrantAddress1'] : null,
 			'RegistrantCity'  			=> !empty($d['registrantCity']) ? $d['registrantCity'] : null,
-			'RegistrantStateProvince'  	=> !empty($d['registrantStateProvince']) ? $d['registrantStateProvince'] : null,	
+			'RegistrantStateProvince'  	=> !empty($d['registrantStateProvince']) ? $d['registrantStateProvince'] : null,
 			'RegistrantPostalCode'  	=> !empty($d['registrantPostalCode']) ? $d['registrantPostalCode'] : null,
 			'RegistrantCountry'  		=> !empty($d['registrantCountry']) ? $d['registrantCountry'] : null,
 			'RegistrantPhone'  			=> !empty($d['registrantPhone']) ? $d['registrantPhone'] : null,
@@ -399,7 +438,7 @@ class Domains extends Api {
 			'RegistrantPhoneExt'  		=> !empty($d['registrantPhoneExt']) ? $d['registrantPhoneExt'] : null,
 			'RegistrantFax'  			=> !empty($d['registrantFax']) ? $d['registrantFax'] : null,
 		];
-		
+
 		$tech = [
 			#Req
 			'TechFirstName' 		=> !empty($d['techFirstName']) ? $d['techFirstName'] : null,
