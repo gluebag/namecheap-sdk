@@ -60,9 +60,7 @@ class Domains extends Api {
             'SortBy' => $sortBy
         ];
 
-        $resp = json_decode($this->get($this->command.__FUNCTION__, $data), true);
-        dd($resp);
-
+        $resp = json_decode($this->get($this->command.'getList', $data), true);
         $totalResults = (int)data_get($resp, 'ApiResponse.CommandResponse.Paging.TotalItems');
 
         collect(data_get($resp, 'ApiResponse.CommandResponse.DomainGetListResult.Domain'))
