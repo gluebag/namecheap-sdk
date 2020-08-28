@@ -1,4 +1,5 @@
 deploy.sh
+composer.lock
 
 .DS_Store
 *.sublime-*
