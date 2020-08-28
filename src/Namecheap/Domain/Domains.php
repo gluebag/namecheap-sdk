@@ -61,6 +61,8 @@ class Domains extends Api {
         ];
 
         $resp = json_decode($this->get($this->command.__FUNCTION__, $data), true);
+        dd($resp);
+
         $totalResults = (int)data_get($resp, 'ApiResponse.CommandResponse.Paging.TotalItems');
 
         collect(data_get($resp, 'ApiResponse.CommandResponse.DomainGetListResult.Domain'))
