@@ -1,7 +1,8 @@
-<?php 
+<?php
 
 namespace Namecheap\Domain;
 
+use Carbon\Carbon;
 use Namecheap\Api;
 use Namecheap\Exception\NamecheapException;
 /**
@@ -34,7 +35,7 @@ class DomainsDns extends Api {
 	 * @param str|SLD|Req : SLD of the DomainName
 	 * @param str|TLD|Req : TLD of the DomainName
 	 * @param str|Nameservers|Req : A comma-separated list of name servers to be associated with this domain
-	 * 
+	 *
 	 * @NOTE: Services like URL forwarding, Email forwarding, Dynamic DNS will not work for domains using custom nameservers
 	 */
 	public function setCustom($std, $tld, $ns) {
@@ -58,12 +59,31 @@ class DomainsDns extends Api {
 	 * @param str|TLD|Req : TLD of the DomainName
 	 */
 	public function getHosts($std, $tld) {
-		return $this->get($this->command.__FUNCTION__, ['SLD' => $std, 'TLD' => $tld]);
+		$hosts = [];
+
+        $resp = json_decode($this->get($this->command.__FUNCTION__, ['SLD' => $std, 'TLD' => $tld]), true);
+
+        collect(data_get($resp, 'ApiResponse.CommandResponse.DomainDNSGetHostsResult.host'))
+            ->each(function($host) use (&$hosts) {
+                $hosts[] = [
+                    'id' => $host['_HostId'],
+                    'name' => $host['_Name'],
+					'name_friendly' => $host['_FriendlyName'],
+                    'type' => $host['_Type'],
+					'address' => $host['_Address'],
+					'mx_pref' => $host['_MXPref'],
+					'ttl' => (int)$host['_TTL'],
+					'active' => filter_var($host['_IsActive'], FILTER_VALIDATE_BOOLEAN),
+					'uses_ddns' => filter_var($host['_IsDDNSEnabled'], FILTER_VALIDATE_BOOLEAN),
+                ];
+            });
+
+        return $hosts;
 	}
 
 	/**
 	 * @todo Gets email forwarding settings for the requested domain
-	 * 
+	 *
 	 * @param str|DomainName|req : Domain name to get settings
 	 */
 	public function getEmailForwarding($domainName) {
@@ -89,7 +109,7 @@ class DomainsDns extends Api {
 	/**
 	 * @todo Sets DNS host records settings for the requested domain.
 	 * @IMPORTANT:  We recommend you use HTTPPOST method when setting more than 10 hostnames. All host records that are not included into the API call will be deleted, so add them in addition to new host records.
-	 * 
+	 *
 	 * @param str|SLD|req : SLD of the domain to setHosts
 	 * @param str|TLD|req : TLD of the domain to setHosts
 	 * @param str|HostName[1..n]|req : Sub-domain/hostname to create the record for
